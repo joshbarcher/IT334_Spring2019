@@ -1,6 +1,7 @@
 package mergesort;
 
 import java.util.Arrays;
+import java.util.Random;
 
 public class MergeSort
 {
@@ -8,9 +9,42 @@ public class MergeSort
 
     public static void main(String[] args)
     {
+        //small test
         int[] testArray = {15, 6, 4, 12, 5, 1, 2, 3};
         mergesort(testArray);
         System.out.println(Arrays.toString(testArray));
+
+        //larger test
+        testArray = generateArray(1000000);
+        mergesort(testArray);
+        System.out.println(Arrays.toString(testArray));
+        System.out.println("Inversions? " + containsInversions(testArray));
+    }
+
+    public static int[] generateArray(int size)
+    {
+        Random random = new Random();
+        int[] results = new int[size];
+
+        for (int i = 0; i < results.length; i++)
+        {
+            results[i] = random.nextInt(size);
+        }
+
+        return results;
+    }
+
+    public static boolean containsInversions(int[] array)
+    {
+        for (int i = 0; i < array.length - 1; i++)
+        {
+            if (array[i] > array[i + 1])
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public static void mergesort(int[] array)
