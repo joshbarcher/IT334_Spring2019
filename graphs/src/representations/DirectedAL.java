@@ -1,8 +1,6 @@
 package representations;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class DirectedAL<V>
 {
@@ -100,37 +98,115 @@ public class DirectedAL<V>
 
     public void clear()
     {
-
+        adjacencyLists = new HashMap<>();
+        vertexSize = 0;
+        edgeSize = 0;
     }
 
     public int getVertexSize()
     {
-        return 0;
+        return vertexSize;
     }
 
     public int getEdgeSize()
     {
-        return 0;
+        return edgeSize;
     }
 
     public Set<V> vertices()
     {
-        return null;
+        return Collections.unmodifiableSet(adjacencyLists.keySet());
     }
 
     public Set<Edge<V>> edges()
     {
-        return null;
+        Set<Edge<V>> edges = new HashSet<>();
+
+        for (V vertex : adjacencyLists.keySet())
+        {
+            Node<V> current = adjacencyLists.get(vertex);
+            while (current != null)
+            {
+                edges.add(new Edge<V>(vertex, current.vertex, current.weight));
+                current = current.next;
+            }
+        }
+        return edges;
     }
 
     public boolean removeVertex(V vertex)
     {
-        return false;
+        if (!adjacencyLists.containsKey(vertex)) return false;
+
+        //remove outgoing edges
+        adjacencyLists.put(vertex, null);
+
+        //remove incoming edges
+        for (V other : adjacencyLists.keySet())
+        {
+            Node<V> current = adjacencyLists.get(other);
+            if (current != null)
+            {
+                if (current.vertex.equals(vertex))
+                {
+                    adjacencyLists.put(other, current.next);
+                }
+                else
+                {
+                    while (current.next != null && !current.next.vertex.equals(vertex))
+                    {
+                        current = current.next;
+                    }
+
+                    if (current.next != null)
+                    {
+                        current.next = current.next.next;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     public boolean removeEdge(V from, V to)
     {
-        return false;
+        if (!adjacencyLists.containsKey(from) || !adjacencyLists.containsKey(to)) return false;
+
+        Node<V> startingPosition = adjacencyLists.get(from);
+        if (startingPosition == null)
+        {
+            return false;
+        }
+        else if (startingPosition.vertex.equals(to))
+        {
+            adjacencyLists.put(from, startingPosition.next);
+        }
+        else
+        {
+            Node<V> before = findEdgeTo(adjacencyLists.get(from), to);
+
+            if (before.next == null)
+            {
+                return false;
+            }
+            else
+            {
+                before.next = before.next.next;
+            }
+        }
+        return true;
+    }
+
+    //finds the position where a node should be located
+    private Node<V> findEdgeTo(Node<V> current, V vertex)
+    {
+        while (current.next != null && !current.next.vertex.equals(vertex))
+        {
+            current = current.next;
+        }
+
+        return current;
     }
 
     public static class Edge<V>
@@ -175,7 +251,7 @@ public class DirectedAL<V>
     private class Node<V>
     {
         private V vertex;
-        private Node next;
+        private Node<V> next;
         private double weight;
 
         public Node(V vertex)
@@ -183,7 +259,7 @@ public class DirectedAL<V>
             this(vertex, null, 0.0);
         }
 
-        public Node(V vertex, Node next, double weight)
+        public Node(V vertex, Node<V> next, double weight)
         {
             this.vertex = vertex;
             this.next = next;
