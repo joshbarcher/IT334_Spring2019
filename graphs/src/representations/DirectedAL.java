@@ -39,11 +39,11 @@ public class DirectedAL<V>
     {
         for (Edge<V> edge : edges)
         {
-            addEdge(edge.from, edge.to);
+            addEdge(edge.from, edge.to, edge.weight);
         }
     }
 
-    public boolean addEdge(V from, V to)
+    public boolean addEdge(V from, V to, double weight)
     {
         //make sure the vertices exist, make sure this is not a duplicate edge
         if (!adjacencyLists.containsKey(from) || !adjacencyLists.containsKey(to) ||
@@ -54,17 +54,31 @@ public class DirectedAL<V>
 
         if (adjacencyLists.get(from) == null)
         {
-            adjacencyLists.put(from, new Node<V>(to));
+            adjacencyLists.put(from, new Node<V>(to, weight));
             return true;
         }
         else
         {
             //create a new head of the linked list of adjacent vertices
-            Node<V> newNode = new Node<>(to);
+            Node<V> newNode = new Node<V>(to, weight);
             newNode.next = adjacencyLists.get(from);
 
             adjacencyLists.put(from, newNode);
             return true;
+        }
+    }
+
+    public void addUndirectedEdge(V first, V second, double weight)
+    {
+        addEdge(first, second, weight);
+        addEdge(second, first, weight);
+    }
+
+    public void addUndirectedEdge(Edge<V>... edges)
+    {
+        for (Edge<V> edge : edges)
+        {
+            addUndirectedEdge(edge.from, edge.to, edge.weight);
         }
     }
 
@@ -209,6 +223,67 @@ public class DirectedAL<V>
         return current;
     }
 
+    public Map<V, V> dijkstras(V source)
+    {
+        //make sure the source vertex exists
+        if (!containsVertex(source))
+        {
+            throw new IllegalArgumentException("Source vertex does not exist: " + source);
+        }
+
+        //create our structures
+        Map<V, V> results = new HashMap<>();
+        Map<V, Double> labels = new HashMap<>(); //for quick lookup of label values
+        PriorityQueue<OrderedVertex<V>> heap = new PriorityQueue<>();
+
+        //store our vertex labels
+        heap.add(new OrderedVertex<>(source, 0.0));
+        labels.put(source, 0.0);
+        results.put(source, null);
+
+        for (V vertex : adjacencyLists.keySet())
+        {
+            if (!vertex.equals(source))
+            {
+                heap.add(new OrderedVertex<>(vertex, -1.0)); //-1 == infinity
+                labels.put(vertex, -1.0);
+            }
+        }
+
+        //calculate the shortest paths
+        while (!heap.isEmpty())
+        {
+            //get the next smallest label
+            OrderedVertex<V> label = heap.poll();
+            V vertex = label.getVertex();
+            double pathSoFar = label.getValue();
+
+            //update adjacent vertex labels (if appropriate)
+            Node<V> adjacent = adjacencyLists.get(vertex);
+            while (adjacent != null)
+            {
+                double candidate = pathSoFar + adjacent.weight;
+                double otherLabel = labels.get(adjacent.vertex);
+
+                //should I update this label?
+                if (otherLabel == -1 || candidate < otherLabel) //if infinity or a better path
+                {
+                    //update the heap
+                    heap.remove(new OrderedVertex<>(adjacent.vertex, otherLabel));
+                    heap.add(new OrderedVertex<>(adjacent.vertex, candidate));
+
+                    //update our housekeeping variables
+                    labels.put(adjacent.vertex, candidate);
+                    results.put(adjacent.vertex, vertex);
+                }
+
+                adjacent = adjacent.next;
+            }
+        }
+
+        return results;
+    }
+
     public static class Edge<V>
     {
         private V from;
@@ -257,6 +332,11 @@ public class DirectedAL<V>
         public Node(V vertex)
         {
             this(vertex, null, 0.0);
+        }
+
+        public Node(V vertex, double weight)
+        {
+            this(vertex, null, weight);
         }
 
         public Node(V vertex, Node<V> next, double weight)
