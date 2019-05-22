@@ -1,6 +1,6 @@
-package representations;
+package graphs;
 
-import representations.DirectedAL.Edge;
+import graphs.DirectedAL.Edge;
 
 public class TestGraph
 {

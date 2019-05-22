@@ -1,4 +1,4 @@
-package representations;
+package graphs;
 
 import java.util.*;
 
@@ -223,6 +223,115 @@ public class DirectedAL<V>
         return current;
     }
 
+    public List<V> dfs(V start)
+    {
+        Set<V> seen = new HashSet<>();
+        List<V> traversal = new ArrayList<>();
+
+        //make sure we have that starting vertex
+        if (!containsVertex(start))
+        {
+            return traversal;
+        }
+
+        dfs(start, seen, traversal);
+
+        return traversal;
+    }
+
+    private void dfs(V element, Set<V> seen, List<V> traversal)
+    {
+        if (!seen.contains(element))
+        {
+            seen.add(element);
+            traversal.add(element);
+
+            Node<V> current = adjacencyLists.get(element);
+            while (current != null)
+            {
+                dfs(current.vertex, seen, traversal);
+                current = current.next;
+            }
+        }
+    }
+
+    public List<V> iterativeDfs(V start)
+    {
+        Set<V> seen = new HashSet<>();
+        List<V> traversal = new ArrayList<>();
+        Stack<V> nextVertex = new Stack<>();
+
+        //make sure we have that starting vertex
+        if (!containsVertex(start))
+        {
+            return traversal;
+        }
+        nextVertex.push(start);
+
+        while (!nextVertex.isEmpty())
+        {
+            V next = nextVertex.pop();
+
+            if (!seen.contains(next))
+            {
+                seen.add(next);
+                traversal.add(next);
+
+                Node<V> current = adjacencyLists.get(next);
+                for (current != null)
+                {
+                    nextVertex.push(current.vertex);
+                    current = current.next;
+                }
+            }
+        }
+
+        return traversal;
+    }
+
+    public List<V> allComponentsDfs()
+    {
+        List<V> allComponents = new ArrayList<>();
+        Set<V> seen = new HashSet<>();
+
+        for (V vertex : vertices())
+        {
+            dfs(vertex, seen, allComponents);
+        }
+
+        return allComponents;
+    }
+
+    public List<V> bfs(V start)
+    {
+        Set<V> seen = new HashSet<>();
+        List<V> traversal = new ArrayList<>();
+        Queue<V> bfsQueue = new LinkedList<>();
+
+        //add the first element
+        bfsQueue.add(start);
+
+        while (!bfsQueue.isEmpty())
+        {
+            V nextElement = bfsQueue.poll();
+            seen.add(nextElement);
+            traversal.add(nextElement);
+
+            //add adjacent vertices
+            Node<V> current = adjacencyLists.get(nextElement);
+            while (current != null)
+            {
+                if (!seen.contains(current.vertex))
+                {
+                    bfsQueue.add(current.vertex);
+                }
+                current = current.next;
+            }
+        }
+
+        return traversal;
+    }
+
     public Map<V, V> dijkstras(V source)
     {
         //make sure the source vertex exists
@@ -282,6 +391,11 @@ public class DirectedAL<V>
         }
 
         return results;
+    }
+
+    public Set<Edge<V>> prims(V source)
+    {
+        return null;
     }
 
     public static class Edge<V>

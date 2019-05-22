@@ -1,4 +1,4 @@
-package representations;
+package graphs;
 
 import java.util.Objects;
 

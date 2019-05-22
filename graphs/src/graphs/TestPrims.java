@@ -1,9 +1,10 @@
-package representations;
+package graphs;
 
-import java.util.Map;
-import representations.DirectedAL.Edge;
+import java.util.Set;
 
-public class TestDijkstras
+import graphs.DirectedAL.Edge;
+
+public class TestPrims
 {
     public static void main(String[] args)
     {
@@ -29,17 +30,15 @@ public class TestDijkstras
             new Edge<Character>('f', 'j', 4.0),
             new Edge<Character>('i', 'h', 2.0),
 
+            new Edge<Character>('h', 'k', 3.0),
+
             new Edge<Character>('k', 'l', 1.0),
             new Edge<Character>('k', 'm', 3.0),
             new Edge<Character>('l', 'm', 4.0)
         );
 
-        Map<Character, Character> results = letterGraph.dijkstras('b');
+        Set<Edge<Character>> results = letterGraph.prims('b');
 
-        //print the map
-        for (char vertex : results.keySet())
-        {
-            System.out.println(vertex + " -> " + results.get(vertex));
-        }
+        //test the results of prims
     }
 }
