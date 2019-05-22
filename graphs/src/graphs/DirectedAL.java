@@ -278,7 +278,7 @@ public class DirectedAL<V>
                 traversal.add(next);
 
                 Node<V> current = adjacencyLists.get(next);
-                for (current != null)
+                while (current != null)
                 {
                     nextVertex.push(current.vertex);
                     current = current.next;
