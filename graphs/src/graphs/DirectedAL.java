@@ -31,6 +31,7 @@ public class DirectedAL<V>
         else
         {
             adjacencyLists.put(vertex, null);
+            vertexSize++;
             return true;
         }
     }
@@ -55,6 +56,7 @@ public class DirectedAL<V>
         if (adjacencyLists.get(from) == null)
         {
             adjacencyLists.put(from, new Node<V>(to, weight));
+            edgeSize++;
             return true;
         }
         else
@@ -64,6 +66,7 @@ public class DirectedAL<V>
             newNode.next = adjacencyLists.get(from);
 
             adjacencyLists.put(from, newNode);
+            edgeSize++;
             return true;
         }
     }
@@ -175,6 +178,7 @@ public class DirectedAL<V>
                     if (current.next != null)
                     {
                         current.next = current.next.next;
+                        vertexSize--;
                     }
                 }
             }
@@ -209,6 +213,7 @@ public class DirectedAL<V>
                 before.next = before.next.next;
             }
         }
+        edgeSize--;
         return true;
     }
 
